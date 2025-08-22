@@ -155,10 +155,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="0027-remove-element.cpp" />
+    <ClCompile Include="0059-spiral-matrix-ii.cpp" />
     <ClCompile Include="0367-valid-perfect-square.cpp" />
     <ClCompile Include="0704-binary-search.cpp" />
     <ClCompile Include="0977-squares-of-a-sorted-array.cpp" />
+    <ClCompile Include="0209-minimum-size-subarray-sum.cpp" />
     <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
