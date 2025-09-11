@@ -9,24 +9,35 @@ public:
 		int n = txt.size(), m = pattern.size();
 		if (m == 0)
 			return 0;
+		
+		// 构建 Next
 		std::vector<int> next(m);
-		for (int i = 1, j = 0; i < m; i++)
+		next[0] = -1;
+		if (m > 1)
+			next[1] = 0;
+		for (int i = 2, j = 0; i < m;)
 		{
-			while (j > 0 && pattern[i] != pattern[j])
-				j = next[j - 1];
-			if (pattern[i] == pattern[j])
-				j++;
-			next[i] = j;
+			if (pattern[i-1] == pattern[j])
+				next[i++] = ++j;
+			else if (j != 0)
+				j = next[j];
+			else
+				next[i++] = 0;
 		}
-		for (int i = 0, j = 0; i < n; i++)
+		// 开始匹配
+		int x = 0, y = 0;
+		while (x < n && y < m)
 		{
-			while (j > 0 && txt[i] != pattern[j])
-				j = next[j - 1];
-			if (txt[i] == pattern[j])
-				j++;
-			if (j == m)
-				return i - m + 1;
+			if (txt[x] == pattern[y])
+			{
+				x++;
+				y++;
+			}
+			else if (y != 0)
+				y = next[y];
+			else
+				x++;
 		}
-		return -1;
+		return y == m ? x - y : -1;
 	}
 };
