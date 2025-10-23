@@ -8,8 +8,7 @@ public:
 	{
 		std::sort(points.begin(), points.end(), [](std::vector<int>& a, std::vector<int>& b)
 		{
-			if (a[0] == b[0]) return a[1] < b[1];
-			return a[0] < b[0];
+			return a[1] < b[1];
 		});
 		
 		int pos = points[0][1];
