@@ -1,31 +1,33 @@
 ﻿#include <algorithm>
 #include <vector>
 
+using namespace std;
+
 class Solution {
 public:
-	std::vector<std::vector<int>> threeSum(std::vector<int>& nums) {
-		std::sort(nums.begin(), nums.end());
-		std::vector<std::vector<int>> ans;
-		int n = nums.size();
-		for (int i = 0; i < n - 2; i++) {
-			int x = nums[i];
-			if (i && x == nums[i - 1]) continue; // 跳过重复数字
-			if (x + nums[i + 1] + nums[i + 2] > 0) break; // 优化一
-			if (x + nums[n - 2] + nums[n - 1] < 0) continue; // 优化二
-			int j = i + 1, k = n - 1;
-			while (j < k) {
-				int s = x + nums[j] + nums[k];
-				if (s > 0) {
-					k--;
-				} else if (s < 0) {
-					j++;
-				} else { // 三数之和为 0
-					ans.push_back({x, nums[j], nums[k]});
-					for (j++; j < k && nums[j] == nums[j - 1]; j++); // 跳过重复数字
-					for (k--; k > j && nums[k] == nums[k + 1]; k--); // 跳过重复数字
-				}
-			}
-		}
-		return ans;
-	}
+    std::vector<std::vector<int> > threeSum(std::vector<int> &nums) {
+        sort(nums.begin(), nums.end());
+        int n = nums.size();
+        std::vector<std::vector<int> > result;
+        for (int i = 0; i < n - 2; i++) {
+            int num1 = nums[i];
+            if (num1 > 0) break; // 最小的数都大于0了
+            if (i > 0 && num1 == nums[i - 1]) continue; // 防重复
+
+            int target = -num1;
+            int third = n-1;
+            for (int j = i + 1; j < n - 1; j++) {
+                int num2 = nums[j];
+                if (j - i > 1 && num2 == nums[j - 1]) continue; // 防重复
+
+                // 移动第三个指针
+                while (third > j && num2 + nums[third] > target) third--;
+                if (third == j) continue;
+                if (num2 + nums[third] == target) {
+                    result.push_back({num1, num2, nums[third]});
+                }
+            }
+        }
+        return result;
+    }
 };
