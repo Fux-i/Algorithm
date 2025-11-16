@@ -1,32 +1,30 @@
 ﻿#include <queue>
 #include <vector>
 
-class Solution
-{
+using namespace std;
+
+class Solution {
 public:
-	std::vector<int> maxSlidingWindow(std::vector<int>& nums, int k)
-	{
-		int n = nums.size();
-		std::priority_queue<int, int> q;
-		for (int i = 0; i < k; ++i)
-		{
-			q.emplace(nums[i], i);
-		}
-		std::vector<int> ans = {q.top().first};
-		for (int i = k; i < n; ++i)
-		{
-			q.emplace(nums[i], i);
-			while (q.top().second <= i - k)
-			{
-				q.pop();
-			}
-			ans.push_back(q.top().first);
-		}
-		return ans;
-	}
+    vector<int> maxSlidingWindow(vector<int> &nums, int k) {
+        int n = nums.size();
+        priority_queue<pair<int, int>> q;
+        for (int i = 0; i < k; ++i) {
+            q.emplace(nums[i], i);
+        }
+        vector<int> ans = {q.top().first};
+        for (int i = k; i < n; ++i) {
+            q.emplace(nums[i], i);
+            while (q.top().second <= i - k) {
+                q.pop();
+            }
+            ans.push_back(q.top().first);
+        }
+        return ans;
+    }
 };
 
-/*class Solution {
+/* time out
+class Solution {
 public:
 	std::vector<int> maxSlidingWindow(std::vector<int>& nums, int k) {
 		auto size = nums.size();
@@ -69,4 +67,5 @@ public:
 
 		return res;
 	}
-};*/
+};
+*/
