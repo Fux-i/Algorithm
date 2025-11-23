@@ -1,84 +1,85 @@
-﻿#include <memory>
-#include <unordered_map>
+﻿#include <unordered_map>
 
 struct Node
 {
-	int                   key;
-	int                   value;
-	std::weak_ptr<Node>   prev;
-	std::shared_ptr<Node> next;
+	int   key;
+	int   value;
+	Node* prev;
+	Node* next;
 
-	Node(int key, int value) : key(key), value(value) {}
+	Node(int key, int value) : key(key), value(value), prev(nullptr), next(nullptr) {}
 };
 
-class LRUCache
-{
-	using node_ptr = std::shared_ptr<Node>;
+class LRUCache {
+	int   capacity_;
+	int   node_count_;
+	Node* head_;
+	Node* last_;
 
-	int      capacity_;
-	int      node_count_{};
-	node_ptr first_;
-	node_ptr last_;
+	std::unordered_map<int, Node*> map_;
 
 public:
-	std::unordered_map<int, node_ptr> map_;
-	LRUCache(int capacity) : capacity_(capacity)
-	{
-		first_       = std::make_shared<Node>(-1, -1);
-		last_        = std::make_shared<Node>(-1, -1);
-		first_->next = last_;
-		last_->prev  = first_;
+	LRUCache(int capacity) : capacity_(capacity), node_count_(0) {
+		head_ = new Node(-1, -1);
+		last_ = new Node(-1, -1);
+		head_->next = last_;
+		last_->prev = head_;
 	}
 
-	int get(int key)
-	{
-		if (map_.find(key) != map_.end())
-		{
-			node_ptr temp = map_[key];
-			remove(temp);
-			insert_first(temp);
-			return temp->value;
+	int get(int key) {
+		auto it = map_.find(key);
+		if (it != map_.end()) {
+			Node* node = it->second;
+			refresh_node(node);
+			return node->value;
 		}
 		return -1;
 	}
 
-	void put(int key, int value)
-	{
-		if (map_.find(key) != map_.end())
-		{
-			node_ptr node = map_[key];
-			node->value   = value;
-			remove(node);
-			insert_first(node);
-			return;
+	void put(int key, int value) {
+		auto it = map_.find(key);
+		if (it != map_.end()) {
+			Node* node = it->second;
+			node->value = value;
+			refresh_node(node);
+		} else {
+			if (node_count_ == capacity_) {
+				remove_last();
+			} else {
+				node_count_++;
+			}
+			Node* node = new Node(key, value);
+			insert_node(node, true);
 		}
-
-		if (node_count_ < capacity_)
-			node_count_++;
-		else
-			remove(last_->prev.lock(), true);
-
-		auto node = std::make_shared<Node>(key, value);
-		map_[key] = node;
-		insert_first(node);
 	}
 
 private:
-	void remove(const node_ptr& node, const bool remove_map = false)
-	{
-		node->prev.lock()->next = node->next;
-		node->next->prev        = node->prev.lock();
-		node->next              = nullptr;
+	void remove_last() {
+		remove_node(last_->prev, true);
+	}
 
-		if (remove_map)
+	void refresh_node(Node* node) {
+		remove_node(node);
+		insert_node(node);
+	}
+
+	void remove_node(Node* node, bool remove_from_map = false) {
+		node->next->prev = node->prev;
+		node->prev->next = node->next;
+		node->next = nullptr;
+		node->prev = nullptr;
+
+		if (remove_from_map)
 			map_.erase(node->key);
 	}
 
-	void insert_first(const node_ptr& node)
-	{
-		node->prev         = first_;
-		node->next         = first_->next;
-		first_->next->prev = node;
-		first_->next       = node;
+	void insert_node(Node* node, bool insert_to_map = false) {
+		node->next = head_->next;
+		head_->next->prev = node;
+		node->prev = head_;
+		head_->next = node;
+
+		if (insert_to_map)
+			map_[node->key] = node;
 	}
 };
