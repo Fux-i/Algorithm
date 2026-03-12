@@ -5,14 +5,14 @@ using namespace std;
 
 class LazySegmentTree {
     using T = pair<int, int>;
-    using F = int;
+    using Flag = int;
 
     // 懒标记初始值
-    const F TODO_INIT = 0;
+    const Flag TODO_INIT = 0;
 
     struct Node {
         T val;
-        F todo;
+        Flag todo;
     };
 
     int n;
@@ -24,12 +24,12 @@ class LazySegmentTree {
     }
 
     // 合并两个懒标记
-    F merge_todo(const F& a, const F& b) const {
+    Flag merge_todo(const Flag& a, const Flag& b) const {
         return a + b;
     }
 
     // 把懒标记作用到 node 子树（本例为区间加）
-    void apply(int node, int l, int r, F todo) {
+    void apply(int node, int l, int r, Flag todo) {
         Node& cur = tree[node];
         // 计算 tree[node] 区间的整体变化
         cur.val.first += todo;
@@ -40,7 +40,7 @@ class LazySegmentTree {
     // 把当前节点的懒标记下传给左右儿子
     void spread(int node, int l, int r) {
         Node& cur = tree[node];
-        F todo = cur.todo;
+        Flag todo = cur.todo;
         if (todo == TODO_INIT) { // 没有需要下传的信息
             return;
         }
@@ -70,7 +70,7 @@ class LazySegmentTree {
         maintain(node);
     }
 
-    void update(int node, int l, int r, int ql, int qr, F f) {
+    void update(int node, int l, int r, int ql, int qr, Flag f) {
         if (ql <= l && r <= qr) { // 当前子树完全在 [ql, qr] 内
             apply(node, l, r, f);
             return;
@@ -119,7 +119,7 @@ public:
     // 用 f 更新 [ql, qr] 中的每个 a[i]
     // 0 <= ql <= qr <= n-1
     // 时间复杂度 O(log n)
-    void update(int ql, int qr, F f) {
+    void update(int ql, int qr, Flag f) {
         update(1, 0, n - 1, ql, qr, f);
     }
 
