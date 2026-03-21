@@ -23,26 +23,16 @@ inline void print(ll x){pt(x), puts("");}
 inline void print(pll x){pt(x.fi), putchar(' '), pt(x.se), putchar('\n');}
 inline void print(vector<ll> &vec){for(const auto t:vec)pt(t),putchar(' ');puts("");}
 
-//fast pow
-ll ksm(ll a, ll b=MOD-2, ll M=MOD){a%=M;ll res=1;while(b){if(b&1){res=(res*a)%M;}a=(a*a)%M;b>>=1;}return res;}
-
-mt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());//rng()
-ull randint(ull l, ull r){uniform_int_distribution<unsigned long long> dist(l, r);return dist(rng);}
-
-void init() {
-
-}
-
-void solve() {
-
-}
-
-
 int main() {
-    init();
-    ll t = 1;
-    t = read();
-    while (t--) {
-        solve();
-    }
+    ll n = read(), k = read();
+    vector<ll> a(n);
+    for (ll i = 0; i < n; ++i)
+    	a[i] = read() % k;
+    ranges::sort(a);
+
+	ll max_gap = 0;
+	for (ll i = 1; i < n; ++i)
+		max_gap = max(max_gap, a[i] - a[i - 1]);
+	max_gap = max(max_gap, a[0] + k - a[n - 1]);
+	print(k - max_gap);
 }
