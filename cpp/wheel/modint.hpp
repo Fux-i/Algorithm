@@ -13,8 +13,8 @@ struct modint {
         _v = v % MOD;
     }
     std::strong_ordering operator<=>(const modint &) const = default;
-    operator int() const { return _v; }
-    operator long long() const { return _v; }
+    // operator int() const { return _v; }
+    // operator long long() const { return _v; }
     int val() const { return _v; }
 
     modint operator+(const modint& other) const {
