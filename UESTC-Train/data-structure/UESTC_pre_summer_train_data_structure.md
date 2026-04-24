@@ -2,151 +2,28 @@
 
 ## A.月光
 
-题目可转化为：有 n 个普通节点（1~n），与上界下界两个特殊节点（0，n+1），求两特殊节点是否连通，显然可以用并查集。
+题目可转化为：有 n 个普通节点（1~n），与上界下界两个特殊节点（0，n+1），求两特殊节点是否连通，显然可以用带启发式合并的并查集。
 
-带启发式合并的并查集：
-
-```c++
-vector<ll> dsu, sizes;
-
-ll find(ll x) {
-	return dsu[x] == x ? x : dsu[x] = find(dsu[x]);
-}
-
-void unite(ll x, ll y) {
-	x = find(x), y = find(y);
-	if (x == y) return;
-	if (sizes[x] < sizes[y]) swap(x, y);
-	dsu[y] = x;
-	sizes[x] += sizes[y];
-}
-
-bool same(ll x, ll y) {
-	return find(x) == find(y);
-}
-```
-
-数据读入后执行两个带早退的大循环。
-
-第一个是判断普通节点与特殊节点是否连通，比较 y 方向的距离与半径即可
-
-```c++
-for (ll i = 1; i <= n; ++i) {
-    circle &c = cs[i];
-    if (abs(c.y - y11) <= c.r) unite(i, 0);
-    if (abs(c.y - y22) <= c.r) unite(i, n + 1);
-    if (same(0, n + 1)) {
-        cout << "Yes\n";
-        return 0;
-    }
-}
-```
-
-第二个是普通节点之间两两判断是否连通，比较圆心距离与半径之和
-
-```c++
-for (ll i = 1; i < n; ++i) {
-    for (ll j = 1; i + j <= n; ++j) {
-        auto &c1 = cs[i], c2 = cs[i + j];
-        if (check(c1, c2)) unite(i, i + j);
-        if (same(0, n + 1)) {
-            cout << "Yes\n";
-            return 0;
-        }
-    }
-}
-```
+数据读入后执行两个带早退的大循环。第一个是判断普通节点与特殊节点是否连通，比较 y 方向的距离与半径即可。第二个是普通节点之间两两判断是否连通，比较圆心距离与半径之和
 
 ## B.树上数颜色
 
-看这题第一眼想法就是树形 DP，开个`<node, color>`的二维数组，递归统计以`node`为根的子树的所有颜色数量，
+看这题第一眼想法就是树形 DP，开个`[node][color]`的二维数组，递归统计以`node`为根的子树的所有颜色数量，
 虽然时间空间都超了，但也没有其他思路了，只能先硬着头皮试一试，结果不出意外 MLE 了。
 
 好吧，只能去学一下能高效做子树查询的数据结构了，也就是 dsu on tree 的这么个东西。
 相比之前的朴素解法，该算法的高明之处在于：
 
-1. 用单个全局变量`cnt[maxn]`（$O(n$)）来保存所有颜色数量，而不用维护$O(n^2)$的二维数组
+1. 用单个全局变量`cnt[maxn]`（$O(n)$）来保存所有颜色数量，而不用维护$O(n^2)$的二维数组
 2. 为了避免试用全局变量时不同子树互相干扰的问题，区分重儿子和轻儿子，先遍历所有轻儿子取得结果后清除对`cnt[maxn]`的影响，
-   把重儿子留到最后，保留影响。这样每个节点就最多被计算$logn$次，因此时间复杂度可以降到$nlogn$
+   把重儿子留到最后，保留影响。这样每个节点就最多被计算$O(logn)$次，因此时间复杂度可以降到$O(nlogn)$
 
-回到代码，首先是基础的数据读入，这里用链式前向星来存树，由于是有根树，就不用当做无向边存两遍了
+回到代码，首先是基础的数据读入，这里用链式前向星来存树，由于是有根树，就不用当做无向边存两遍了。
 
-```c++
-int main() {
-	ios::sync_with_stdio(false);
-	cin.tie(nullptr);
-	cin >> n;
-	for (int i = 1; i <= n; i++) {
-		cin >> color[i];
-	}
-	for (int i = 1; i < n; ++i) {
-		int u, v;
-		cin >> u >> v;
-		to[i] = v;
-		nxt[i] = head[u];
-		head[u] = i;
-	}
-	dfs1(1);
-	dfs2(1, true);
-	for (int i = 1; i <= n; ++i) {
-		cout << ans[i] << " \n"[i == n];
-	}
-}
-```
-
-其中 dfs1 是用来找重儿子的
-
-```c++
-void dfs1(int node) {
-	int max_size = 0;
-	siz[node] = 1;
-	for (int i = head[node]; i; i = nxt[i]) {
-		dfs1(to[i]);
-		int child_size = siz[to[i]];
-		siz[node] += child_size;
-		if (child_size > max_size) {
-			max_size = child_size;
-			son[node] = to[i];
-		}
-	}
-}
-```
-
-dfs2 才是真正开始计算，因为需要 dfs1 结束后才知道谁是重儿子，才知道以什么顺序来计算。
-
+其中 dfs1 是用来找重儿子的，dfs2 才是真正开始计算，因为需要 dfs1 结束后才知道谁是重儿子，才知道以什么顺序来计算。
 这里需要注意处理重儿子时要保留影响，参数`clear`为`false`
 
-```c++
-void dfs2(int node, bool clear) {
-	int h_son = son[node];
-	for (int i = head[node]; i; i = nxt[i]) {
-		if (to[i] == h_son) continue;
-		dfs2(to[i], true);
-	}
-	if (h_son) {
-		dfs2(h_son, false);
-	}
-	add(node, 1, h_son);
-	ans[node] = color_sum;
-	if (clear) {
-		add(node, -1);  // 清除时要清除重儿子在内的所有累计
-		color_sum = 0;
-		max_cnt = 0;
-	}
-}
-```
-
-add 函数也要注意，递归累计颜色数量时要调过重儿子，但清除时不能跳过，否则会影响`node`同级的其他子树
-
-```c++
-void add(int node, int val, int h_son = 0) {
-	...
-	for (int i = head[node]; i; i = nxt[i]) {
-		if (to[i] == h_son) continue;
-		add(to[i], val);
-	}
-}
-```
+add 函数也要注意，递归累计颜色数量时要调过重儿子，但清除时不能跳过，否则会影响`node`同级的其他子树.
 
 ## D.线段树全家桶
 
@@ -183,3 +60,38 @@ void add(int node, int val, int h_son = 0) {
 ```
 
 所以 range assign 时只需`tree[idx] = {ass * (r - l + 1), ass, 0, ass};`就好了，assign 会直接覆盖原有的未处理的`mul`和`add`。
+
+## P.雪堆
+
+本题数据规模为$1e5$，那应该是要想个$O(nlogn)$的算法，第一反应就是二分查找，或线段树，但本题用线段树有点大材小用了。
+
+先假设所有雪堆都是无限大，那么每天融化的体积就是$t_i \times n_i$（$n_i$为第$i$天剩余雪堆数），考虑有限大的雪堆，那就是
+$t_i \times n_i + x$（$x$为恰好在第$i$天融化完的雪堆的当天融化体积之和）。
+
+现在进入关键点了：如何$O(nlogn)$的时间复杂度内求出每个雪堆融化完的时间？这里我用的是前缀和+二分查找：
+
+`sum_t[i]`表示`t[0] + t[1] + ... + t[i - 1]`，`last`表示`i`为`last[i].first`个雪堆存活的最后一天，
+这些雪堆最后一天共融化的体积为`last[i].second`。注意，由于每个雪堆的起始时间不同，需要加上`sum_t[i]`来复用`sum_t`做二分查找。
+
+```c++
+ vector<ll> v(n), t(n), sum_t(n + 1);
+ vector<pll> last(n);
+ for (ll i = 0; i < n; ++i) {
+     ll temp_v = v[i] + sum_t[i];
+     ll d = ranges::lower_bound(sum_t.begin() + i + 1, sum_t.end(), temp_v) - sum_t.begin() - 1;
+     if (d == n) continue;
+     last[d].first++;
+     last[d].second += temp_v - sum_t[d];
+ }
+```
+
+最后的计算如下：
+
+```c++
+ ll num_alive = 0;
+ for (ll i = 0; i < n; ++i) {
+     num_alive++;
+     num_alive -= last[i].first;
+     cout << num_alive * t[i] + last[i].second << " \n"[i == n - 1];
+ }
+```
