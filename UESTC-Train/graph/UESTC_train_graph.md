@@ -33,6 +33,13 @@ for(int i = 0; i < n; ++i){
 
 求欧拉回路路径，dfs 用栈存所有节点编号即可，用了链式前向星的弧优化
 
+
+## G. Tarjan · cutp, pbcc, cute, ebcc
+
+> cut-point, point-biconnected-component, cut-edge, edge-biconnected-component
+
+见博客（）
+
 ## H. Tarjan · SCC
 
 题目大意：在简单有向图中，求最少需要加多少条边，才能使从 $s$ 开始可以到达所有节点
