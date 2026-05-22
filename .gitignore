@@ -10,3 +10,5 @@ AGENTS.md
 main.cpp
 *.vcxproj
 *.txt
+.cache
+.vscode
