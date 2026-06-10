@@ -1,14 +1,9 @@
 bin/
 obj/
-/packages/
-riderModule.iml
-/_ReSharper.Caches/
-.idea/
-x64/
+build/
 
 AGENTS.md
 main.cpp
-*.vcxproj
 *.txt
 .cache
 .vscode
