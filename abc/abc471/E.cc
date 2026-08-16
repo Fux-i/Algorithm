@@ -1,3 +1,5 @@
+// -math
+
 #include <compare>
 #include <iostream>
 
