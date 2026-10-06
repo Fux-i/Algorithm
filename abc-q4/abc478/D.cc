@@ -31,8 +31,7 @@ void solve() {
     bucket[l].push_back({r, x});
   }
   for (int p = 1; p <= n; p++) {
-    for (auto &op : bucket[p]) {
-      int r = op.fi, x = op.se;
+    for (auto [r, x] : bucket[p]) {
       if (r > maxr[x]) {
         if (maxr[x] > 0)
           add(maxr[x], -1);

@@ -1,3 +1,4 @@
+// -segtree
 #include <algorithm>
 #include <climits>
 #include <iostream>
